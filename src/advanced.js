@@ -356,3 +356,77 @@ function setDatasetValue(element, key, value) {
     element.dataset[key] = value;
   }
 }
+
+async function runAutoReplyTest() {
+  const provider = getProviderSettingsFromForm();
+  const userText = getInputValue(elements.autoReplyTestInput) || "你好方便发份简历过来吗";
+
+  setTextValue(elements.autoReplyTestResult, "测试中，请稍候...");
+  if (elements.autoReplyTestButton) {
+    elements.autoReplyTestButton.disabled = true;
+  }
+
+  try {
+    const response = await chrome.runtime.sendMessage({
+      type: "boss-helper:call-chat-api",
+      payload: {
+        provider: provider.provider,
+        apiKey: provider.apiKey,
+        endpoint: provider.endpoint,
+        model: provider.model,
+        temperature: clampNumber(Number(getInputValue(elements.autoReplyTemperature)), 0, 1, DEFAULT_SETTINGS.autoReplyTemperature),
+        maxTokens: clampNumber(Number(getInputValue(elements.autoReplyMaxTokens)), 64, 4096, DEFAULT_SETTINGS.autoReplyMaxTokens),
+        messages: buildTestMessages(userText)
+      }
+    });
+
+    if (!response?.ok) {
+      throw new Error(response?.error || "测试请求失败");
+    }
+
+    const reply = response?.result?.content || "";
+    setTextValue(elements.autoReplyTestResult, reply ? `回复：${reply}` : "未返回有效内容。");
+  } catch (error) {
+    setTextValue(elements.autoReplyTestResult, `测试失败：${error instanceof Error ? error.message : String(error)}`);
+  } finally {
+    if (elements.autoReplyTestButton) {
+      elements.autoReplyTestButton.disabled = false;
+    }
+  }
+}
+
+function buildTestMessages(userText) {
+  const systemPrompt = getInputValue(elements.autoReplySystemPrompt) || DEFAULT_SETTINGS.autoReplySystemPrompt;
+  return [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userText }
+  ];
+}
+
+function getProviderSettingsFromForm() {
+  const provider = getInputValue(elements.autoReplyProvider);
+  if (provider === "doubao") {
+    return {
+      provider,
+      apiKey: getInputValue(elements.doubaoApiKey),
+      endpoint: getInputValue(elements.doubaoEndpoint) || DEFAULT_SETTINGS.doubaoEndpoint,
+      model: getInputValue(elements.doubaoModel) || DEFAULT_SETTINGS.doubaoModel
+    };
+  }
+
+  if (provider === "yuanbao") {
+    return {
+      provider,
+      apiKey: getInputValue(elements.yuanbaoApiKey),
+      endpoint: getInputValue(elements.yuanbaoEndpoint) || DEFAULT_SETTINGS.yuanbaoEndpoint,
+      model: getInputValue(elements.yuanbaoModel) || DEFAULT_SETTINGS.yuanbaoModel
+    };
+  }
+
+  return {
+    provider: "deepseek",
+    apiKey: getInputValue(elements.deepseekApiKey),
+    endpoint: getInputValue(elements.deepseekEndpoint) || DEFAULT_SETTINGS.deepseekEndpoint,
+    model: getInputValue(elements.deepseekModel) || DEFAULT_SETTINGS.deepseekModel
+  };
+}
