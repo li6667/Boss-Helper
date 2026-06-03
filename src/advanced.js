@@ -24,7 +24,10 @@ const DEFAULT_SETTINGS = {
   yuanbaoEndpoint: "https://api.hunyuan.cloud.tencent.com/v1/chat/completions",
   doubaoModel: "",
   deepseekModel: "deepseek-chat",
-  yuanbaoModel: "hunyuan-lite"
+  yuanbaoModel: "hunyuan-lite",
+  otherApiKey: "",
+  otherEndpoint: "https://api.openai.com/v1/chat/completions",
+  otherModel: "gpt-4o"
 };
 
 const RECRUITER_ACTIVITY_OPTIONS = [
@@ -62,6 +65,9 @@ const elements = {
   yuanbaoApiKey: document.getElementById("yuanbaoApiKey"),
   yuanbaoEndpoint: document.getElementById("yuanbaoEndpoint"),
   yuanbaoModel: document.getElementById("yuanbaoModel"),
+  otherApiKey: document.getElementById("otherApiKey"),
+  otherEndpoint: document.getElementById("otherEndpoint"),
+  otherModel: document.getElementById("otherModel"),
   autoReplyTestInput: document.getElementById("autoReplyTestInput"),
   autoReplyTestButton: document.getElementById("autoReplyTestButton"),
   autoReplyTestResult: document.getElementById("autoReplyTestResult"),
@@ -112,6 +118,9 @@ function hydrate(settings) {
   setInputValue(elements.yuanbaoApiKey, settings.yuanbaoApiKey || "");
   setInputValue(elements.yuanbaoEndpoint, settings.yuanbaoEndpoint || DEFAULT_SETTINGS.yuanbaoEndpoint);
   setInputValue(elements.yuanbaoModel, settings.yuanbaoModel || DEFAULT_SETTINGS.yuanbaoModel);
+  setInputValue(elements.otherApiKey, settings.otherApiKey || "");
+  setInputValue(elements.otherEndpoint, settings.otherEndpoint || DEFAULT_SETTINGS.otherEndpoint);
+  setInputValue(elements.otherModel, settings.otherModel || DEFAULT_SETTINGS.otherModel);
   updateProviderVisibility();
 }
 
@@ -138,7 +147,10 @@ function bindEvents() {
     "deepseekModel",
     "yuanbaoApiKey",
     "yuanbaoEndpoint",
-    "yuanbaoModel"
+    "yuanbaoModel",
+    "otherApiKey",
+    "otherEndpoint",
+    "otherModel"
   ]) {
     const element = elements[key];
     if (!element) {
@@ -203,7 +215,10 @@ async function saveSettings(options = {}) {
     deepseekModel: getInputValue(elements.deepseekModel) || DEFAULT_SETTINGS.deepseekModel,
     yuanbaoApiKey: getInputValue(elements.yuanbaoApiKey),
     yuanbaoEndpoint: getInputValue(elements.yuanbaoEndpoint) || DEFAULT_SETTINGS.yuanbaoEndpoint,
-    yuanbaoModel: getInputValue(elements.yuanbaoModel) || DEFAULT_SETTINGS.yuanbaoModel
+    yuanbaoModel: getInputValue(elements.yuanbaoModel) || DEFAULT_SETTINGS.yuanbaoModel,
+    otherApiKey: getInputValue(elements.otherApiKey),
+    otherEndpoint: getInputValue(elements.otherEndpoint) || DEFAULT_SETTINGS.otherEndpoint,
+    otherModel: getInputValue(elements.otherModel) || DEFAULT_SETTINGS.otherModel
   });
 
   try {
@@ -327,7 +342,10 @@ function normalizeSettings(payload = {}) {
     yuanbaoEndpoint: String(payload.yuanbaoEndpoint || DEFAULT_SETTINGS.yuanbaoEndpoint),
     doubaoModel: String(payload.doubaoModel || DEFAULT_SETTINGS.doubaoModel),
     deepseekModel: String(payload.deepseekModel || DEFAULT_SETTINGS.deepseekModel),
-    yuanbaoModel: String(payload.yuanbaoModel || DEFAULT_SETTINGS.yuanbaoModel)
+    yuanbaoModel: String(payload.yuanbaoModel || DEFAULT_SETTINGS.yuanbaoModel),
+    otherApiKey: String(payload.otherApiKey || ""),
+    otherEndpoint: String(payload.otherEndpoint || DEFAULT_SETTINGS.otherEndpoint),
+    otherModel: String(payload.otherModel || DEFAULT_SETTINGS.otherModel)
   };
 }
 
@@ -422,6 +440,15 @@ function getProviderSettingsFromForm() {
       apiKey: getInputValue(elements.yuanbaoApiKey),
       endpoint: getInputValue(elements.yuanbaoEndpoint) || DEFAULT_SETTINGS.yuanbaoEndpoint,
       model: getInputValue(elements.yuanbaoModel) || DEFAULT_SETTINGS.yuanbaoModel
+    };
+  }
+
+  if (provider === "other") {
+    return {
+      provider,
+      apiKey: getInputValue(elements.otherApiKey),
+      endpoint: getInputValue(elements.otherEndpoint) || DEFAULT_SETTINGS.otherEndpoint,
+      model: getInputValue(elements.otherModel) || DEFAULT_SETTINGS.otherModel
     };
   }
 

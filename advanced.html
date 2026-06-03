@@ -520,6 +520,7 @@
               <option value="doubao">豆包(字节)</option>
               <option value="deepseek">DeepSeek</option>
               <option value="yuanbao">腾讯元宝/混元</option>
+              <option value="other">其他</option>
             </select>
           </div>
 
@@ -589,6 +590,24 @@
               <label for="yuanbaoEndpoint">腾讯元宝 Endpoint</label>
               <input id="yuanbaoEndpoint" type="text"
                 placeholder="https://api.hunyuan.cloud.tencent.com/v1/chat/completions" />
+            </div>
+          </div>
+
+          <div class="provider-group" data-provider="other">
+            <div class="grid-two">
+              <div class="field">
+                <label for="otherApiKey">API Key</label>
+                <input id="otherApiKey" type="password" placeholder="sk-..." />
+              </div>
+              <div class="field">
+                <label for="otherModel">Model</label>
+                <input id="otherModel" type="text" placeholder="gpt-4o" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="otherEndpoint">Endpoint</label>
+              <input id="otherEndpoint" type="text"
+                placeholder="https://api.openai.com/v1/chat/completions" />
             </div>
           </div>
 

@@ -49,7 +49,10 @@ const DEFAULT_SETTINGS = {
   yuanbaoEndpoint: "https://api.hunyuan.cloud.tencent.com/v1/chat/completions",
   doubaoModel: "",
   deepseekModel: "deepseek-chat",
-  yuanbaoModel: "hunyuan-lite"
+  yuanbaoModel: "hunyuan-lite",
+  otherApiKey: "",
+  otherEndpoint: "https://api.openai.com/v1/chat/completions",
+  otherModel: "gpt-4o"
 };
 
 const SELECTORS = {
@@ -1820,6 +1823,14 @@ function getProviderSettings() {
       apiKey: state.settings.yuanbaoApiKey,
       endpoint: state.settings.yuanbaoEndpoint,
       model: state.settings.yuanbaoModel
+    };
+  }
+  if (provider === "other") {
+    return {
+      provider,
+      apiKey: state.settings.otherApiKey,
+      endpoint: state.settings.otherEndpoint,
+      model: state.settings.otherModel
     };
   }
   return {
