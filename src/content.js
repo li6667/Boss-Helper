@@ -215,7 +215,8 @@ const state = {
   autoReplyTimer: null,
   lastAutoReplySignature: "",
   lastAutoReplyAt: 0,
-  autoReplyInFlight: false
+  autoReplyInFlight: false,
+  autoReplyDebug: ""
 };
 
 const ACTION_RESULT = {
@@ -819,6 +820,11 @@ function installObservers() {
 
 function startAutoReplyLoop() {
   clearInterval(state.autoReplyTimer);
+  state.lastAutoReplySignature = "";
+  state.autoReplyDebug = "";
+  if (state.settings.autoReplyEnabled) {
+    logEvent("自动回复", "聊天监控已启动，等待聊天窗口出现。");
+  }
   state.autoReplyTimer = setInterval(() => {
     void tryAutoReply();
   }, AUTO_REPLY_POLL_MS);
@@ -1749,20 +1755,26 @@ async function tryAutoReply() {
     return;
   }
 
-  if (!findVisibleChatInput()) {
-    return;
+  const hasChatInput = Boolean(findVisibleChatInput());
+  const chatMessages = hasChatInput ? collectChatMessages() : [];
+  const lastIsUser = chatMessages.length > 0 && chatMessages[chatMessages.length - 1].role === "user";
+
+  const status = [
+    hasChatInput ? "有输入框" : "无输入框",
+    chatMessages.length ? `消息${chatMessages.length}条` : "无消息",
+    lastIsUser ? "对方最后发言" : (chatMessages.length ? "自己最后发言" : "-")
+  ].join(" | ");
+
+  if (status !== state.autoReplyDebug) {
+    state.autoReplyDebug = status;
+    logEvent("自动回复检测", status);
   }
 
-  const chatMessages = collectChatMessages();
-  if (!chatMessages.length) {
+  if (!hasChatInput || !chatMessages.length || !lastIsUser) {
     return;
   }
 
   const lastMessage = chatMessages[chatMessages.length - 1];
-  if (lastMessage.role !== "user") {
-    return;
-  }
-
   const signature = normalizeCompareText(lastMessage.content).slice(0, 180);
   if (!signature || signature === state.lastAutoReplySignature) {
     return;
